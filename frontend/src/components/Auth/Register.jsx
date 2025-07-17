@@ -16,7 +16,7 @@ const Register = () => {
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
 
-  const { isAuthorized, setIsAuthorized, user, setUser } = useContext(Context);
+  const { isAuthorized, setIsAuthorized, setUser } = useContext(Context);
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -31,102 +31,103 @@ const Register = () => {
           withCredentials: true,
         }
       );
-      toast.success(data.message);
+
+      toast.success(data?.message || "Registration successful!");
+
       setName("");
       setEmail("");
       setPassword("");
       setPhone("");
       setRole("");
       setIsAuthorized(true);
+      setUser(data?.user || null);
     } catch (error) {
-      toast.error(error.response.data.message);
+      const errorMsg =
+        error?.response?.data?.message || "Registration failed. Please try again.";
+      toast.error(errorMsg);
+      console.error("Registration error:", error);
     }
   };
 
-  if(isAuthorized){
-    return <Navigate to={'/'}/>
+  if (isAuthorized) {
+    return <Navigate to="/" />;
   }
 
-
   return (
-    <>
-      <section className="authPage">
-        <div className="container">
-          <div className="header">
-            <img src="/JobZeelogo.png" alt="logo" />
-            <h3>Create a new account</h3>
+    <section className="authPage">
+      <div className="container">
+        <div className="header">
+          <img src="/JobZeelogo.png" alt="logo" />
+          <h3>Create a new account</h3>
+        </div>
+        <form onSubmit={handleRegister}>
+          <div className="inputTag">
+            <label>Register As</label>
+            <div>
+              <select value={role} onChange={(e) => setRole(e.target.value)}>
+                <option value="">Select Role</option>
+                <option value="Employer">Employer</option>
+                <option value="Job Seeker">Job Seeker</option>
+              </select>
+              <FaRegUser />
+            </div>
           </div>
-          <form>
-            <div className="inputTag">
-              <label>Register As</label>
-              <div>
-                <select value={role} onChange={(e) => setRole(e.target.value)}>
-                  <option value="">Select Role</option>
-                  <option value="Employer">Employer</option>
-                  <option value="Job Seeker">Job Seeker</option>
-                </select>
-                <FaRegUser />
-              </div>
+          <div className="inputTag">
+            <label>Name</label>
+            <div>
+              <input
+                type="text"
+                placeholder="Vicky"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+              <FaPencilAlt />
             </div>
-            <div className="inputTag">
-              <label>Name</label>
-              <div>
-                <input
-                  type="text"
-                  placeholder="Vicky "
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                />
-                <FaPencilAlt />
-              </div>
+          </div>
+          <div className="inputTag">
+            <label>Email Address</label>
+            <div>
+              <input
+                type="email"
+                placeholder="vk@gmail.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <MdOutlineMailOutline />
             </div>
-            <div className="inputTag">
-              <label>Email Address</label>
-              <div>
-                <input
-                  type="email"
-                  placeholder="vk@gmail.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-                <MdOutlineMailOutline />
-              </div>
+          </div>
+          <div className="inputTag">
+            <label>Phone Number</label>
+            <div>
+              <input
+                type="number"
+                placeholder="12345678"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+              />
+              <FaPhoneFlip />
             </div>
-            <div className="inputTag">
-              <label>Phone Number</label>
-              <div>
-                <input
-                  type="number"
-                  placeholder="12345678"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                />
-                <FaPhoneFlip />
-              </div>
+          </div>
+          <div className="inputTag">
+            <label>Password</label>
+            <div>
+              <input
+                type="password"
+                placeholder="Your Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <RiLock2Fill />
             </div>
-            <div className="inputTag">
-              <label>Password</label>
-              <div>
-                <input
-                  type="password"
-                  placeholder="Your Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-                <RiLock2Fill />
-              </div>
-            </div>
-            <button type="submit" onClick={handleRegister}>
-              Register
-            </button>
-            <Link to={"/login"}>Login Now</Link>
-          </form>
-        </div>
-        <div className="banner">
-          <img src="/register.png" alt="login" />
-        </div>
-      </section>
-    </>
+          </div>
+          <button type="submit">Register</button>
+          <Link to="/login">Login Now</Link>
+        </form>
+      </div>
+      <div className="banner">
+        <img src="/register.png" alt="login" />
+      </div>
+    </section>
   );
 };
 
