@@ -13,14 +13,30 @@ const app = express();
 // Load .env
 config({ path: "./config/config.env" });
 
-// ✅ CORS Setup
+// ✅ Determine FRONTEND URL dynamically
+// Allowed origins
+const allowedOrigins = [
+  process.env.FRONTEND_URL_LOCAL,
+  process.env.FRONTEND_URL_NETLIFY
+];
+
+// CORS setup
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL, 
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps, Postman)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
   })
 );
+
 
 // Middlewares
 app.use(cookieParser());
@@ -38,7 +54,6 @@ app.use(
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/job", jobRouter);
 app.use("/api/v1/application", applicationRouter);
-
 
 // Error middleware
 app.use(errorMiddleware);
