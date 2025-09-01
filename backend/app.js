@@ -20,22 +20,24 @@ const allowedOrigins = [
   process.env.FRONTEND_URL_NETLIFY
 ];
 
+
 // CORS setup
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow requests with no origin (like mobile apps, Postman)
+      // Allow requests with no origin (like Postman)
       if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      } else {
-        return callback(new Error("Not allowed by CORS"));
-      }
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(new Error("Not allowed by CORS"));
     },
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // ✅ add OPTIONS
   })
 );
+
+// Handle preflight requests globally
+app.options("*", cors()); // ✅ enable pre-flight for all routes
+
 
 
 // Middlewares
