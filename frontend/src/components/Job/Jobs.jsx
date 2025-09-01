@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Context } from "../../main";
 import { FiSearch, FiBriefcase, FiMapPin, FiDollarSign, FiClock, FiFilter } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
-
+import { URL } from "../../../constant/api";
 const Jobs = () => {
   const [jobs, setJobs] = useState([]);
   const [filteredJobs, setFilteredJobs] = useState([]);
@@ -22,7 +22,7 @@ const Jobs = () => {
     const fetchJobs = async () => {
       try {
         setLoading(true);
-        const res = await axios.get("http://localhost:4000/api/v1/job/getall", {
+        const res = await axios.get(`${URL}/v1/job/getall`, {
           withCredentials: true,
         });
         setJobs(res.data.jobs || []);

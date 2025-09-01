@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { Context } from "../../main";
 import { FaBriefcase, FaMapMarkerAlt, FaMoneyBillWave, FaFileAlt } from "react-icons/fa";
-
+import { URL } from "../../../constant/api";
 const PostJob = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -44,7 +44,7 @@ const PostJob = () => {
     
     try {
       const response = await axios.post(
-        "http://localhost:4000/api/v1/job/post",
+        `${URL}/v1/job/post`,
         fixedSalary.length >= 4
           ? {
               title,

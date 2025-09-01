@@ -4,7 +4,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import ResumeModal from "./ResumeModal";
-
+import { URL } from "../../../constant/api";
 const MyApplications = () => {
   const { user, isAuthorized } = useContext(Context);
   const [applications, setApplications] = useState([]);
@@ -19,13 +19,13 @@ const MyApplications = () => {
         setLoading(true);
         if (user && user.role === "Employer") {
           const res = await axios.get(
-            "http://localhost:4000/api/v1/application/employer/getall",
+            `${URL}/v1/application/employer/getall`,
             { withCredentials: true }
           );
           setApplications(res.data.applications);
         } else {
           const res = await axios.get(
-            "http://localhost:4000/api/v1/application/jobseeker/getall",
+            `${URL}/v1/application/jobseeker/getall`,
             { withCredentials: true }
           );
           setApplications(res.data.applications);
@@ -47,7 +47,7 @@ const MyApplications = () => {
   const deleteApplication = async (id) => {
     try {
       const res = await axios.delete(
-        `http://localhost:4000/api/v1/application/delete/${id}`,
+        `${URL}/v1/application/delete/${id}`,
         { withCredentials: true }
       );
       toast.success(res.data.message);

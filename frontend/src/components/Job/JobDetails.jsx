@@ -3,7 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Context } from "../../main";
-
+import { URL } from "../../../constant/api";
 const JobDetails = () => {
   const { id } = useParams();
   const [job, setJob] = useState({});
@@ -14,7 +14,7 @@ const JobDetails = () => {
   useEffect(() => {
     const fetchJob = async () => {
       try {
-        const res = await axios.get(`http://localhost:4000/api/v1/job/${id}`, {
+        const res = await axios.get(`${URL}/v1/job/${id}`, {
           withCredentials: true,
         });
         setJob(res.data.job);

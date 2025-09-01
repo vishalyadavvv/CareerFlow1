@@ -5,7 +5,7 @@ import { FaCheck, FaEdit, FaTrash, FaBriefcase, FaMapMarkerAlt, FaMoneyBillWave,
 import { RxCross2 } from "react-icons/rx";
 import { Context } from "../../main";
 import { useNavigate } from "react-router-dom";
-
+import { URL } from "../../../constant/api";
 const MyJobs = () => {
   const [myJobs, setMyJobs] = useState([]);
   const [editingMode, setEditingMode] = useState(null);
@@ -19,7 +19,7 @@ const MyJobs = () => {
       try {
         setIsLoading(true);
         const { data } = await axios.get(
-          "http://localhost:4000/api/v1/job/getmyjobs",
+          `${URL}/v1/job/getmyjobs`,
           { withCredentials: true }
         );
         setMyJobs(data.myJobs);
@@ -54,7 +54,7 @@ const MyJobs = () => {
     const updatedJob = myJobs.find((job) => job._id === jobId);
     try {
       const res = await axios.put(
-        `http://localhost:4000/api/v1/job/update/${jobId}`,
+        `${URL}/v1/job/update/${jobId}`,
         updatedJob,
         {
           withCredentials: true,
@@ -73,7 +73,7 @@ const MyJobs = () => {
     
     try {
       const res = await axios.delete(
-        `http://localhost:4000/api/v1/job/delete/${jobId}`,
+        `${URL}/v1/job/delete/${jobId}`,
         {
           withCredentials: true,
         }

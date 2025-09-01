@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { RxCross2 } from "react-icons/rx";
 import gsap from "gsap";
-
+import { URL } from "../../../constant/api";
 const Navbar = () => {
   const [show, setShow] = useState(false);
   const [isOverlayVisible, setIsOverlayVisible] = useState(false);
@@ -24,7 +24,7 @@ const Navbar = () => {
   const handleLogout = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:4000/api/v1/user/logout",
+        `${URL}/v1/user/logout`,
         {
           withCredentials: true,
         }
