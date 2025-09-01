@@ -10,15 +10,20 @@ import cookieParser from "cookie-parser";
 import fileUpload from "express-fileupload";
 
 const app = express();
+
+// Load .env
 config({ path: "./config/config.env" });
+
+// ✅ CORS Setup: allow frontend origin and credentials
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL,
-    methods: ["GET", "POST", "DELETE", "PUT"],
+    origin: "http://localhost:5173", 
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE"],
   })
 );
 
+// Middlewares
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -29,10 +34,16 @@ app.use(
     tempFileDir: "/tmp/",
   })
 );
+
+// Routes
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/job", jobRouter);
 app.use("/api/v1/application", applicationRouter);
+
+// DB Connect
 dbConnection();
 
+// Error middleware
 app.use(errorMiddleware);
+
 export default app;
