@@ -16,7 +16,7 @@ config({ path: "./config/config.env" });
 // ✅ CORS Setup
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: process.env.FRONTEND_URL, 
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
   })
@@ -39,7 +39,6 @@ app.use("/api/v1/user", userRouter);
 app.use("/api/v1/job", jobRouter);
 app.use("/api/v1/application", applicationRouter);
 
-// ❌ remove dbConnection() from here
 
 // Error middleware
 app.use(errorMiddleware);
