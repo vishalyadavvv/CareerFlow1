@@ -3,7 +3,7 @@ import React, { useContext, useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { useNavigate, useParams } from "react-router-dom";
 import { Context } from "../../main";
-import { URL } from "../../../constant/api";
+import { URL as API_URL } from "../../../constant/api";
 
 const Application = () => {
   const [name, setName] = useState("");
@@ -17,25 +17,34 @@ const Application = () => {
 
   const { isAuthorized, user } = useContext(Context);
   const navigateTo = useNavigate();
-  const { id: jobId } = useParams(); // get job ID from route
+  const { id: jobId } = useParams();
 
   // Handle file change and preview
-  const handleFileChange = (event) => {
-    const file = event.target.files[0];
-    setResume(file);
-
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
     if (file) {
-      const objectURL = URL.createObjectURL(file);
-      setPreviewURL(objectURL);
-    } else {
-      setPreviewURL(null);
+      // Check file size (5MB max)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("File size exceeds 5MB limit");
+        return;
+      }
+      
+      // Check file type
+      const validTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+      if (!validTypes.includes(file.type)) {
+        toast.error("Invalid file type. Please upload PDF, JPG, or PNG");
+        return;
+      }
+      
+      setResume(file);
+      setPreviewURL(window.URL.createObjectURL(file));
     }
   };
 
   // Cleanup preview URL
   useEffect(() => {
     return () => {
-      if (previewURL) URL.revokeObjectURL(previewURL);
+      if (previewURL) window.URL.revokeObjectURL(previewURL);
     };
   }, [previewURL]);
 
@@ -54,7 +63,7 @@ const Application = () => {
     formData.append("coverLetter", coverLetter);
     formData.append("phone", phone);
     formData.append("address", address);
-    formData.append("jobId", jobId); // send jobId to backend
+    formData.append("jobId", jobId);
     if (resume) formData.append("resume", resume);
 
     try {
@@ -62,19 +71,36 @@ const Application = () => {
       const res = await axios.post(`${URL}/v1/application/post`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
         withCredentials: true,
+        timeout: 30000, // 30 second timeout
       });
+      
       toast.success("Application submitted successfully!");
-      navigateTo("/job/getall"); // redirect after submission
+      navigateTo("/job/getall");
     } catch (error) {
-      console.error(error);
-      toast.error(error.response?.data?.message || "Failed to submit application");
+      console.error("Submission error:", error);
+      
+      if (error.code === 'ECONNABORTED') {
+        toast.error("Request timeout. Please try again.");
+      } else if (error.response?.status === 500) {
+        toast.error("Server error. Please try again later or contact support.");
+      } else if (error.response?.status === 413) {
+        toast.error("File too large. Please upload a file smaller than 5MB.");
+      } else {
+        toast.error(error.response?.data?.message || "Failed to submit application");
+      }
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  // Redirect if not authorized
+  useEffect(() => {
+    if (!isAuthorized || (user && user.role === "Employer")) {
+      navigateTo("/");
+    }
+  }, [isAuthorized, user, navigateTo]);
+
   if (!isAuthorized || (user && user.role === "Employer")) {
-    navigateTo("/");
     return null;
   }
 
@@ -220,4 +246,3 @@ const Application = () => {
 };
 
 export default Application;
-  
