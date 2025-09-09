@@ -9,4 +9,5 @@ router.post("/login", login);
 router.get("/logout", isAuthenticated, logout);
 router.get("/getuser", isAuthenticated, getUser);
 router.get("/me", isAuthenticated, getUser); // check cookie
+router.get("/profile", isAuthenticated, getUser); // frontend uses this
 export default router;

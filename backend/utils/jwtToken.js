@@ -17,7 +17,8 @@ export const sendToken = (user, statusCode, res, message) => {
          id: user._id,
          name: user.name,
          email: user.email,
-         role: user.role
-       }
+         phone: user.phone,
+         role: user.role,
+       },
      });
 };
