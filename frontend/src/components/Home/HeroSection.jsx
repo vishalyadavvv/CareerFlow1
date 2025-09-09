@@ -1,196 +1,144 @@
 import React, { useEffect, useRef, useState } from "react";
-import { FaBuilding, FaSuitcase, FaUsers, FaUserPlus, FaSearch, FaMapMarkerAlt, FaFilter } from "react-icons/fa";
 
 const HeroSection = () => {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isVisible, setIsVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [location, setLocation] = useState("");
   const heroRef = useRef(null);
-  const textRef = useRef(null);
-  const imageRef = useRef(null);
 
   const stats = [
-    { value: "1.2M+", label: "Active Jobs", icon: <FaSuitcase />, color: "#3B82F6" },
-    { value: "850K+", label: "Companies", icon: <FaBuilding />, color: "#8B5CF6" },
-    { value: "5.3M+", label: "Job Seekers", icon: <FaUsers />, color: "#10B981" },
-    { value: "420K+", label: "Employers", icon: <FaUserPlus />, color: "#F59E0B" },
+    { value: "2.4M+", label: "Active Jobs", change: "+12%" },
+    { value: "95K+", label: "Companies", change: "+8%" },
+    { value: "8.1M+", label: "Professionals", change: "+15%" },
+    { value: "150+", label: "Countries", change: "+5%" },
+  ];
+
+  const companies = [
+    { name: "Google", logo: "https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg" },
+    { name: "Microsoft", logo: "https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" },
+    { name: "Apple",  logo: "https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" },
+    { name: "Amazon", logo: "https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg" },
+     {
+    name: "Meta",
+    color: "#1877F2",
+    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Meta_Platforms_Inc._logo_%28cropped%29.svg/288px-Meta_Platforms_Inc._logo_%28cropped%29.svg"
+  },
+    { name: "Netflix",  logo: "https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg" },
+    { name: "Spotify", logo: "https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" },
+    { name: "Airbnb",  logo: "https://upload.wikimedia.org/wikipedia/commons/6/69/Airbnb_Logo_Bélo.svg" }
   ];
 
   useEffect(() => {
-    setIsVisible(true);
-    
-    const handleMouseMove = (e) => {
-      setMousePosition({
-        x: (e.clientX / window.innerWidth) * 100,
-        y: (e.clientY / window.innerHeight) * 100,
-      });
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-    };
+    const timer = setTimeout(() => setIsVisible(true), 100);
+    return () => clearTimeout(timer);
   }, []);
 
+  const handleSearch = () => {
+    console.log("Searching for:", searchQuery, "in", location);
+  };
+
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-800 overflow-hidden">
-      
-      {/* Dynamic Background */}
-      <div 
-        className="absolute inset-0 opacity-30"
-        style={{
-          background: `radial-gradient(circle at ${mousePosition.x}% ${mousePosition.y}%, rgba(139, 92, 246, 0.3) 0%, transparent 50%)`
-        }}
-      />
-      
-      {/* Mesh Gradient Background */}
+    <div className="relative min-h-screen bg-white overflow-hidden">
+      {/* Background Pattern */}
       <div className="absolute inset-0">
-        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-cyan-400/20 animate-pulse" />
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-pink-500/30 to-violet-600/30 rounded-full blur-3xl animate-bounce" style={{ animationDuration: '6s' }} />
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-r from-cyan-500/30 to-blue-600/30 rounded-full blur-3xl animate-bounce" style={{ animationDuration: '8s', animationDelay: '2s' }} />
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100" />
       </div>
 
-      {/* Main Content */}
-      <div className="relative z-10 container mx-auto px-6 lg:px-8 pt-20">
-        
-        {/* Hero Section */}
-        <div className="grid lg:grid-cols-2 gap-16 items-center min-h-[80vh]">
-          
-          {/* Left Content */}
-          <div 
-            ref={textRef}
-            className={`space-y-8 transform transition-all duration-1000 ${
-              isVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'
-            }`}
-          >
-            {/* Badge */}
-            <div className="inline-flex items-center space-x-2 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full px-6 py-3">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-              <span className="text-white/90 text-sm font-medium">🔥 Trending Jobs Available</span>
-            </div>
-
-            {/* Main Heading */}
-            <div className="space-y-4">
-              <h1 className="text-5xl lg:text-7xl font-black text-white leading-[1.1] tracking-tight">
-                Find Your
-                <span className="block bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-transparent animate-pulse">
-                  Dream Career
-                </span>
-              </h1>
-              <div className="w-24 h-1 bg-gradient-to-r from-cyan-400 to-purple-600 rounded-full" />
-            </div>
-
-            {/* Description */}
-            <p className="text-xl text-gray-300 leading-relaxed max-w-lg">
-              Connect with top companies, discover opportunities that match your skills, and take the next step in your professional journey.
+      <div className="relative z-10">
+        {/* Hero Content */}
+        <div className="container mx-auto px-4 py-16 lg:py-24">
+          {/* Main Heading */}
+          <div className="text-center max-w-5xl mx-auto mb-16">
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight">
+              Find the{" "}
+              <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                perfect job
+              </span>{" "}
+              for your future
+            </h1>
+            <p className="text-xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed">
+              Connect with world-class companies, discover opportunities that match your ambitions,
+              and accelerate your career with personalized job recommendations.
             </p>
 
-            {/* Search Bar */}
-            <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-2 flex items-center space-x-2 max-w-lg">
-              <div className="flex items-center space-x-3 flex-1 px-4">
-                <FaSearch className="text-gray-400" />
-                <input 
-                  type="text" 
-                  placeholder="Job title or keyword..."
-                  className="bg-transparent text-white placeholder-gray-400 flex-1 outline-none text-lg"
+            {/* Search Section */}
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-3 max-w-4xl mx-auto mb-8">
+              <div className="grid md:grid-cols-3 gap-3">
+                <input
+                  type="text"
+                  placeholder="Job title, keywords, or company"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-4 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-              </div>
-              <div className="flex items-center space-x-3 px-4 border-l border-white/20">
-                <FaMapMarkerAlt className="text-gray-400" />
-                <input 
-                  type="text" 
-                  placeholder="Location"
-                  className="bg-transparent text-white placeholder-gray-400 w-24 outline-none"
+                <input
+                  type="text"
+                  placeholder="City, state, or remote"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  className="w-full pl-4 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
+                <button
+                  onClick={handleSearch}
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 px-8 rounded-xl font-semibold transition-all duration-200 hover:scale-105 shadow-lg"
+                >
+                  Search Jobs
+                </button>
               </div>
-              <button className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 hover:scale-105 shadow-lg">
-                Search
-              </button>
             </div>
 
-            {/* Quick Filters */}
-            <div className="flex flex-wrap gap-3">
-              {['Remote', 'Full-time', 'Tech', 'Marketing', 'Design'].map((filter) => (
-                <button 
-                  key={filter}
-                  className="bg-white/5 hover:bg-white/15 border border-white/20 text-white px-4 py-2 rounded-full text-sm transition-all duration-300 hover:scale-105"
+            {/* Trusted Companies */}
+            <p className="text-gray-500 text-lg font-medium mb-8">Trusted by professionals at world-class companies</p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-6 max-w-6xl mx-auto">
+              {companies.map((company, index) => (
+                <div
+                  key={index}
+                  className="group cursor-pointer transform hover:scale-110 transition-all duration-300"
                 >
-                  {filter}
-                </button>
+                  <div
+                    className="w-20 h-20 rounded-2xl flex items-center justify-center shadow-lg hover:shadow-2xl transition-all duration-300 border-2 border-white/20 hover:border-white/40 backdrop-blur-sm"
+                    style={{
+                      backgroundColor: company.color,
+                      boxShadow: `0 10px 30px ${company.color}40, 0 6px 15px ${company.color}25`
+                    }}
+                  >
+                    <img
+                      src={company.logo}
+                      alt={company.name}
+                      className="w-10 h-10 object-contain mx-auto"
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500 mt-3 font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-center">
+                    {company.name}
+                  </p>
+                </div>
               ))}
             </div>
           </div>
 
-          {/* Right Content - Image */}
-          <div 
-            ref={imageRef}
-            className={`relative transform transition-all duration-1200 delay-300 ${
-              isVisible ? 'translate-x-0 opacity-100' : 'translate-x-20 opacity-0'
-            }`}
-          >
-            {/* Floating Elements */}
-            <div className="absolute -top-8 -left-8 w-24 h-24 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-2xl rotate-12 opacity-80 animate-bounce" style={{ animationDuration: '3s' }} />
-            <div className="absolute -bottom-6 -right-6 w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full opacity-60 animate-bounce" style={{ animationDuration: '4s', animationDelay: '1s' }} />
-            
-            {/* Main Image Container */}
-            <div className="relative bg-gradient-to-br from-white/20 to-white/5 backdrop-blur-xl border border-white/20 rounded-3xl p-8 hover:scale-105 transition-transform duration-500">
-              <img 
-                src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-                alt="Professional team meeting"
-                className="w-full h-80 object-cover rounded-2xl shadow-2xl"
-              />
-              
-              {/* Overlay Stats */}
-              <div className="absolute -bottom-4 -left-4 bg-gradient-to-r from-green-500 to-emerald-400 text-white p-4 rounded-2xl shadow-xl">
-                <div className="text-2xl font-bold">98%</div>
-                <div className="text-sm opacity-90">Success Rate</div>
+          {/* Stats Section */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+            {stats.map((stat, index) => (
+              <div key={index} className="text-center">
+                <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+                  <div className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">{stat.value}</div>
+                  <div className="text-gray-600 text-sm mb-2">{stat.label}</div>
+                  <div className="inline-flex items-center text-green-600 text-xs font-semibold">
+                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                      <path
+                        fillRule="evenodd"
+                        d="M5.293 7.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L6.707 7.707a1 1 0 01-1.414 0z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    {stat.change}
+                  </div>
+                </div>
               </div>
-              
-              <div className="absolute -top-4 -right-4 bg-gradient-to-r from-orange-500 to-red-400 text-white p-4 rounded-2xl shadow-xl">
-                <div className="text-2xl font-bold">24h</div>
-                <div className="text-sm opacity-90">Avg Response</div>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
-
-        {/* Stats Section */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mt-20 pb-20">
-          {stats.map((stat, index) => (
-            <div 
-              key={index}
-              className={`group bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 text-center hover:bg-white/20 transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 ${
-                isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
-              }`}
-              style={{ transitionDelay: `${index * 100 + 800}ms` }}
-            >
-              <div 
-                className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4 text-white text-xl group-hover:scale-110 transition-transform duration-300"
-                style={{ backgroundColor: stat.color }}
-              >
-                {stat.icon}
-              </div>
-              <div className="text-3xl font-bold text-white mb-2">{stat.value}</div>
-              <div className="text-gray-300 text-sm">{stat.label}</div>
-            </div>
-          ))}
-        </div>
       </div>
-
-      {/* Decorative Elements */}
-      <div className="absolute top-20 right-20 w-2 h-2 bg-cyan-400 rounded-full animate-ping" />
-      <div className="absolute top-40 right-40 w-1 h-1 bg-purple-400 rounded-full animate-ping" style={{ animationDelay: '1s' }} />
-      <div className="absolute bottom-40 left-20 w-2 h-2 bg-pink-400 rounded-full animate-ping" style={{ animationDelay: '2s' }} />
-
-      <style jsx>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-10px); }
-        }
-        .animate-float {
-          animation: float 3s ease-in-out infinite;
-        }
-      `}</style>
     </div>
   );
 };

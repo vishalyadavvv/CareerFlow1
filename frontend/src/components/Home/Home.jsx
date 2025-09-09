@@ -15,10 +15,27 @@ const Home = () => {
   return (
     <>
       <section className="homePage page">
-        <HeroSection />
-        <HowItWorks />
-        <PopularCategories />
-        <PopularCompanies />
+        <div className="w-full">
+          {/* Hero Section - Full width with responsive padding */}
+          <div className="px-4 sm:px-6 lg:px-8">
+            <HeroSection />
+          </div>
+          
+          {/* How It Works - Responsive container */}
+          <div className="px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
+            <HowItWorks />
+          </div>
+          
+          {/* Popular Categories - Responsive grid container */}
+          <div className="px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16 bg-gray-50">
+            <PopularCategories />
+          </div>
+          
+          {/* Popular Companies - Responsive container */}
+          <div className="px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
+            <PopularCompanies />
+          </div>
+        </div>
       </section>
     </>
   );

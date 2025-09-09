@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { Context } from "../../main";
 import { Link } from "react-router-dom";
 import { FaFacebookF, FaYoutube, FaLinkedin, FaArrowUp } from "react-icons/fa";
@@ -12,9 +12,8 @@ gsap.registerPlugin(ScrollTrigger);
 const Footer = () => {
   const { isAuthorized } = useContext(Context);
   const footerRef = useRef(null);
-  const socialLinksRef = useRef([]);
-  const copyrightRef = useRef(null);
-  const scrollTopRef = useRef(null);
+  const [animationsLoaded, setAnimationsLoaded] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   const scrollToTop = () => {
     window.scrollTo({
@@ -23,160 +22,152 @@ const Footer = () => {
     });
   };
 
+  // Handle scroll to top button visibility
   useEffect(() => {
-    if (isAuthorized && footerRef.current) {
-      // Animate footer entrance
-      gsap.fromTo(
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 300);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Optimized animations - only run once when authorized
+  useEffect(() => {
+    if (isAuthorized && footerRef.current && !animationsLoaded) {
+      // Single timeline for better performance
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: footerRef.current,
+          start: "top 95%",
+          toggleActions: "play none none none",
+          once: true // Only trigger once for better performance
+        }
+      });
+
+      // Animate footer with reduced complexity
+      tl.fromTo(
         footerRef.current,
-        { y: 100, opacity: 0 },
-        { 
-          y: 0, 
-          opacity: 1, 
-          duration: 1, 
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: footerRef.current,
-            start: "top 90%",
-            toggleActions: "play none none reverse"
-          }
-        }
-      );
-
-      // Animate social icons with stagger
-      gsap.fromTo(
-        socialLinksRef.current,
+        { y: 30, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.8, ease: "power2.out" }
+      )
+      .fromTo(
+        ".footer-section",
         { y: 20, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.6,
-          stagger: 0.1,
-          delay: 0.3,
-          ease: "back.out(1.7)",
-          scrollTrigger: {
-            trigger: footerRef.current,
-            start: "top 90%",
-            toggleActions: "play none none reverse"
-          }
-        }
+        { y: 0, opacity: 1, duration: 0.6, stagger: 0.1, ease: "power2.out" },
+        "-=0.4"
       );
 
-      // Animate copyright text
-      gsap.fromTo(
-        copyrightRef.current,
-        { opacity: 0 },
-        {
-          opacity: 1,
-          duration: 0.8,
-          delay: 0.6,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: footerRef.current,
-            start: "top 90%",
-            toggleActions: "play none none reverse"
-          }
-        }
-      );
-
-      // Animate scroll to top button
-      gsap.fromTo(
-        scrollTopRef.current,
-        { scale: 0, opacity: 0 },
-        {
-          scale: 1,
-          opacity: 1,
-          duration: 0.5,
-          delay: 0.9,
-          ease: "back.out(1.7)",
-          scrollTrigger: {
-            trigger: footerRef.current,
-            start: "top 90%",
-            toggleActions: "play none none reverse"
-          }
-        }
-      );
+      setAnimationsLoaded(true);
     }
-  }, [isAuthorized]);
+  }, [isAuthorized, animationsLoaded]);
 
   const socialLinks = [
     {
-      icon: <FaFacebookF className="text-lg" />,
+      icon: <FaFacebookF className="text-sm sm:text-base lg:text-lg" />,
       url: "https://www.facebook.com/profile.php?id=100024670202929",
-      color: "hover:bg-blue-600"
+      color: "hover:bg-blue-600",
+      label: "Facebook"
     },
     {
-      icon: <FaYoutube className="text-lg" />,
+      icon: <FaYoutube className="text-sm sm:text-base lg:text-lg" />,
       url: "https://www.youtube.com/@vickymimit9987",
-      color: "hover:bg-red-600"
+      color: "hover:bg-red-600",
+      label: "YouTube"
     },
     {
-      icon: <FaLinkedin className="text-lg" />,
+      icon: <FaLinkedin className="text-sm sm:text-base lg:text-lg" />,
       url: "https://www.linkedin.com/in/vicky-kumar-691a92222/",
-      color: "hover:bg-blue-500"
+      color: "hover:bg-blue-500",
+      label: "LinkedIn"
     },
     {
-      icon: <RiInstagramFill className="text-lg" />,
+      icon: <RiInstagramFill className="text-sm sm:text-base lg:text-lg" />,
       url: "https://www.instagram.com/vickyyyky_singh/",
-      color: "hover:bg-pink-600"
+      color: "hover:bg-pink-600",
+      label: "Instagram"
     }
   ];
 
+  // Updated navigation links to match your routing structure
   const quickLinks = [
     { name: "Home", path: "/" },
     { name: "All Jobs", path: "/job/getall" },
-    { name: "About Us", path: "/about" },
-    { name: "Contact", path: "/contact" }
+    { name: "Login", path: "/login" },
+    { name: "Register", path: "/register" }
   ];
+
+  const jobSeekerLinks = [
+    { name: "Browse Jobs", path: "/job/getall" },
+    { name: "Create Account", path: "/register" },
+    { name: "My Applications", path: "/applications/me" },
+    { name: "Login", path: "/login" }
+  ];
+
+  const employerLinks = [
+    { name: "Post a Job", path: "/job/post" },
+    { name: "Create Account", path: "/register" },
+    { name: "My Jobs", path: "/job/me" },
+    { name: "Login", path: "/login" }
+  ];
+
+  const legalLinks = [
+    { name: "Privacy Policy", path: "/privacy" },
+    { name: "Terms of Service", path: "/terms" },
+    { name: "Cookie Policy", path: "/cookies" }
+  ];
+
+  if (!isAuthorized) return null;
 
   return (
     <footer
       ref={footerRef}
-      className={`bg-gradient-to-r from-gray-900 to-blue-900 text-white pt-16 pb-8 transition-all duration-500 ${
-        isAuthorized ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-      }`}
+      className="bg-gradient-to-r from-gray-900 to-blue-900 text-white pt-12 sm:pt-16 pb-6 sm:pb-8"
     >
-      <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-8 sm:mb-12">
+          
           {/* Company Info */}
-          <div className="lg:col-span-1">
-            <h3 className="text-2xl font-bold mb-6 flex items-center">
+          <div className="footer-section sm:col-span-2 lg:col-span-1">
+            <h3 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 flex items-center">
               <img 
                 src="/JobZee-logos__white.png" 
                 alt="JobZee Logo" 
-                className="h-10 mr-2"
+                className="h-8 sm:h-10 mr-2"
+                loading="lazy"
               />
-             CareerFlow
+              CareerFlow
             </h3>
-            <p className="text-gray-300 mb-6">
+            <p className="text-gray-300 mb-4 sm:mb-6 text-sm sm:text-base leading-relaxed">
               Connecting talent with opportunity. Find your dream job or the perfect candidate with our advanced platform.
             </p>
-            <div className="flex space-x-4">
+            <div className="flex space-x-3 sm:space-x-4">
               {socialLinks.map((link, index) => (
-                <Link
+                <a
                   key={index}
-                  to={link.url}
+                  href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`bg-blue-800 p-3 rounded-full transition-all duration-300 transform hover:scale-110 ${link.color}`}
-                  ref={el => (socialLinksRef.current[index] = el)}
+                  className={`bg-blue-800 p-2.5 sm:p-3 rounded-full transition-all duration-300 transform hover:scale-110 active:scale-95 ${link.color} touch-manipulation`}
+                  aria-label={link.label}
                 >
                   {link.icon}
-                </Link>
+                </a>
               ))}
             </div>
           </div>
 
           {/* Quick Links */}
-          <div>
-            <h4 className="text-xl font-semibold mb-6">Quick Links</h4>
-            <ul className="space-y-3">
+          <div className="footer-section">
+            <h4 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6">Quick Links</h4>
+            <ul className="space-y-2 sm:space-y-3">
               {quickLinks.map((link, index) => (
                 <li key={index}>
                   <Link 
                     to={link.path} 
-                    className="text-gray-300 hover:text-white transition-colors duration-300 flex items-center"
+                    className="text-gray-300 hover:text-white transition-colors duration-300 flex items-center text-sm sm:text-base py-1 touch-manipulation"
                   >
-                    <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
+                    <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-blue-500 rounded-full mr-2 sm:mr-3 flex-shrink-0"></span>
                     {link.name}
                   </Link>
                 </li>
@@ -185,51 +176,70 @@ const Footer = () => {
           </div>
 
           {/* Job Seeker */}
-          <div>
-            <h4 className="text-xl font-semibold mb-6">For Job Seekers</h4>
-            <ul className="space-y-3">
-              <li><Link to="/job/getall" className="text-gray-300 hover:text-white transition-colors duration-300">Browse Jobs</Link></li>
-              <li><Link to="/register" className="text-gray-300 hover:text-white transition-colors duration-300">Create Account</Link></li>
-              <li><Link to="/applications/me" className="text-gray-300 hover:text-white transition-colors duration-300">Job Alerts</Link></li>
-              <li><Link to="/blog" className="text-gray-300 hover:text-white transition-colors duration-300">Career Advice</Link></li>
+          <div className="footer-section">
+            <h4 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6">For Job Seekers</h4>
+            <ul className="space-y-2 sm:space-y-3">
+              {jobSeekerLinks.map((link, index) => (
+                <li key={index}>
+                  <Link 
+                    to={link.path} 
+                    className="text-gray-300 hover:text-white transition-colors duration-300 text-sm sm:text-base py-1 block touch-manipulation"
+                  >
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
           {/* Employers */}
-          <div>
-            <h4 className="text-xl font-semibold mb-6">For Employers</h4>
-            <ul className="space-y-3">
-              <li><Link to="/job/post" className="text-gray-300 hover:text-white transition-colors duration-300">Post a Job</Link></li>
-              <li><Link to="/register" className="text-gray-300 hover:text-white transition-colors duration-300">Create Account</Link></li>
-              <li><Link to="/job/me" className="text-gray-300 hover:text-white transition-colors duration-300">Browse Candidates</Link></li>
-              <li><Link to="/pricing" className="text-gray-300 hover:text-white transition-colors duration-300">Pricing Plans</Link></li>
+          <div className="footer-section">
+            <h4 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6">For Employers</h4>
+            <ul className="space-y-2 sm:space-y-3">
+              {employerLinks.map((link, index) => (
+                <li key={index}>
+                  <Link 
+                    to={link.path} 
+                    className="text-gray-300 hover:text-white transition-colors duration-300 text-sm sm:text-base py-1 block touch-manipulation"
+                  >
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
         </div>
 
         {/* Copyright */}
-        <div className="border-t border-gray-700 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p ref={copyrightRef} className="text-gray-400 mb-4 md:mb-0">
-            &copy; {new Date().getFullYear()}CareerFlow. All Rights Reserved by Vishal.
+        <div className="footer-section border-t border-gray-700 pt-6 sm:pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+          <p className="text-gray-400 text-sm sm:text-base text-center sm:text-left">
+            &copy; {new Date().getFullYear()} CareerFlow. All Rights Reserved by Vishal.
           </p>
           
-          <div className="flex space-x-6 text-sm text-gray-400">
-            <Link to="/privacy" className="hover:text-white transition-colors duration-300">Privacy Policy</Link>
-            <Link to="/terms" className="hover:text-white transition-colors duration-300">Terms of Service</Link>
-            <Link to="/cookies" className="hover:text-white transition-colors duration-300">Cookie Policy</Link>
+          <div className="flex flex-wrap justify-center sm:justify-end space-x-4 sm:space-x-6 text-xs sm:text-sm text-gray-400">
+            {legalLinks.map((link, index) => (
+              <Link 
+                key={index}
+                to={link.path} 
+                className="hover:text-white transition-colors duration-300 py-1 touch-manipulation"
+              >
+                {link.name}
+              </Link>
+            ))}
           </div>
         </div>
       </div>
 
       {/* Scroll to Top Button */}
-      <button
-        ref={scrollTopRef}
-        onClick={scrollToTop}
-        className="fixed bottom-6 right-6 bg-blue-600 text-white p-3 rounded-full shadow-lg transition-all duration-300 hover:bg-blue-700 hover:shadow-xl transform hover:-translate-y-1 z-50"
-        aria-label="Scroll to top"
-      >
-        <FaArrowUp />
-      </button>
+      {showScrollTop && (
+        <button
+          onClick={scrollToTop}
+          className="fixed bottom-4 sm:bottom-6 right-4 sm:right-6 bg-blue-600 text-white p-2.5 sm:p-3 rounded-full shadow-lg transition-all duration-300 hover:bg-blue-700 hover:shadow-xl transform hover:-translate-y-1 active:scale-95 z-50 touch-manipulation"
+          aria-label="Scroll to top"
+        >
+          <FaArrowUp className="text-sm sm:text-base" />
+        </button>
+      )}
     </footer>
   );
 };

@@ -6,6 +6,7 @@ import { RxCross2 } from "react-icons/rx";
 import { Context } from "../../main";
 import { useNavigate } from "react-router-dom";
 import { URL } from "../../../constant/api";
+
 const MyJobs = () => {
   const [myJobs, setMyJobs] = useState([]);
   const [editingMode, setEditingMode] = useState(null);
@@ -97,57 +98,57 @@ const MyJobs = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-lg text-indigo-700 font-medium">Loading your jobs...</p>
+          <div className="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-t-2 border-b-2 border-indigo-600 mx-auto"></div>
+          <p className="mt-3 sm:mt-4 text-base sm:text-lg text-indigo-700 font-medium">Loading your jobs...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 py-6 px-3 sm:py-8 sm:px-4 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 mb-4 animate-fade-in-down">
+        <div className="text-center mb-8 sm:mb-10 lg:mb-12">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 mb-3 sm:mb-4 animate-fade-in-down">
             Your Posted Opportunities
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto px-2">
             Manage, update, and track all your job listings in one place
           </p>
-          <div className="mt-6 h-1 w-24 bg-gradient-to-r from-indigo-400 to-purple-400 rounded-full mx-auto"></div>
+          <div className="mt-4 sm:mt-6 h-1 w-16 sm:w-20 lg:w-24 bg-gradient-to-r from-indigo-400 to-purple-400 rounded-full mx-auto"></div>
         </div>
 
         {myJobs.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 lg:gap-8">
             {myJobs.map((element, index) => (
               <div
                 key={element._id}
-                className="bg-white rounded-2xl shadow-xl overflow-hidden transition-all duration-300 hover:shadow-2xl animate-fade-in-up relative"
+                className="bg-white rounded-xl sm:rounded-2xl shadow-lg sm:shadow-xl overflow-hidden transition-all duration-300 hover:shadow-xl sm:hover:shadow-2xl animate-fade-in-up relative"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 {/* Status Badge */}
-                <div className={`absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-semibold ${element.expired ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
+                <div className={`absolute top-3 sm:top-4 right-3 sm:right-4 px-2 py-1 sm:px-3 sm:py-1 rounded-full text-xs font-semibold ${element.expired ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
                   {element.expired ? 'Expired' : 'Active'}
                 </div>
                 
                 {/* Card Header with Gradient */}
-                <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-5 text-white">
+                <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-4 sm:p-5 text-white">
                   <div className="flex items-center justify-between">
-                    <FaBriefcase className="text-xl" />
-                    <span className="text-sm bg-white bg-opacity-20 px-2 py-1 rounded-full">
+                    <FaBriefcase className="text-lg sm:text-xl" />
+                    <span className="text-xs sm:text-sm bg-white bg-opacity-20 px-2 py-1 rounded-full">
                       {element.category}
                     </span>
                   </div>
-                  <h3 className="text-xl font-bold mt-3 truncate">{element.title}</h3>
+                  <h3 className="text-lg sm:text-xl font-bold mt-2 sm:mt-3 truncate">{element.title}</h3>
                 </div>
 
-                <div className="p-6">
-                  <div className="space-y-5">
+                <div className="p-4 sm:p-5 lg:p-6">
+                  <div className="space-y-4 sm:space-y-5">
                     {/* Location */}
                     <div className="flex items-start">
-                      <FaMapMarkerAlt className="text-indigo-500 mt-1 mr-3 flex-shrink-0" />
+                      <FaMapMarkerAlt className="text-indigo-500 mt-0.5 sm:mt-1 mr-2 sm:mr-3 flex-shrink-0 text-sm sm:text-base" />
                       <div className="flex-1">
-                        <h4 className="text-sm font-semibold text-gray-500 mb-1">Location</h4>
+                        <h4 className="text-xs sm:text-sm font-semibold text-gray-500 mb-1">Location</h4>
                         <div className="grid grid-cols-2 gap-2">
                           <input
                             type="text"
@@ -160,7 +161,7 @@ const MyJobs = () => {
                                 e.target.value
                               )
                             }
-                            className={`w-full px-3 py-2 border rounded-lg transition-all duration-200 ${
+                            className={`w-full px-2 sm:px-3 py-1.5 sm:py-2 border rounded-lg transition-all duration-200 text-xs sm:text-sm ${
                               editingMode === element._id
                                 ? "border-indigo-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                                 : "border-transparent bg-gray-50"
@@ -178,7 +179,7 @@ const MyJobs = () => {
                                 e.target.value
                               )
                             }
-                            className={`w-full px-3 py-2 border rounded-lg transition-all duration-200 ${
+                            className={`w-full px-2 sm:px-3 py-1.5 sm:py-2 border rounded-lg transition-all duration-200 text-xs sm:text-sm ${
                               editingMode === element._id
                                 ? "border-indigo-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                                 : "border-transparent bg-gray-50"
@@ -191,9 +192,9 @@ const MyJobs = () => {
 
                     {/* Salary */}
                     <div className="flex items-start">
-                      <FaMoneyBillWave className="text-indigo-500 mt-1 mr-3 flex-shrink-0" />
+                      <FaMoneyBillWave className="text-indigo-500 mt-0.5 sm:mt-1 mr-2 sm:mr-3 flex-shrink-0 text-sm sm:text-base" />
                       <div className="flex-1">
-                        <h4 className="text-sm font-semibold text-gray-500 mb-1">Salary</h4>
+                        <h4 className="text-xs sm:text-sm font-semibold text-gray-500 mb-1">Salary</h4>
                         {element.fixedSalary ? (
                           <input
                             type="number"
@@ -206,7 +207,7 @@ const MyJobs = () => {
                                 e.target.value
                               )
                             }
-                            className={`w-full px-3 py-2 border rounded-lg transition-all duration-200 ${
+                            className={`w-full px-2 sm:px-3 py-1.5 sm:py-2 border rounded-lg transition-all duration-200 text-xs sm:text-sm ${
                               editingMode === element._id
                                 ? "border-indigo-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                                 : "border-transparent bg-gray-50"
@@ -225,7 +226,7 @@ const MyJobs = () => {
                                   e.target.value
                                 )
                               }
-                              className={`px-3 py-2 border rounded-lg transition-all duration-200 ${
+                              className={`px-2 sm:px-3 py-1.5 sm:py-2 border rounded-lg transition-all duration-200 text-xs sm:text-sm ${
                                 editingMode === element._id
                                   ? "border-indigo-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                                   : "border-transparent bg-gray-50"
@@ -243,7 +244,7 @@ const MyJobs = () => {
                                   e.target.value
                                 )
                               }
-                              className={`px-3 py-2 border rounded-lg transition-all duration-200 ${
+                              className={`px-2 sm:px-3 py-1.5 sm:py-2 border rounded-lg transition-all duration-200 text-xs sm:text-sm ${
                                 editingMode === element._id
                                   ? "border-indigo-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                                   : "border-transparent bg-gray-50"
@@ -257,9 +258,9 @@ const MyJobs = () => {
 
                     {/* Category */}
                     <div className="flex items-start">
-                      <FaBriefcase className="text-indigo-500 mt-1 mr-3 flex-shrink-0" />
+                      <FaBriefcase className="text-indigo-500 mt-0.5 sm:mt-1 mr-2 sm:mr-3 flex-shrink-0 text-sm sm:text-base" />
                       <div className="flex-1">
-                        <h4 className="text-sm font-semibold text-gray-500 mb-1">Category</h4>
+                        <h4 className="text-xs sm:text-sm font-semibold text-gray-500 mb-1">Category</h4>
                         <select
                           value={element.category}
                           onChange={(e) =>
@@ -270,7 +271,7 @@ const MyJobs = () => {
                             )
                           }
                           disabled={editingMode !== element._id}
-                          className={`w-full px-3 py-2 border rounded-lg transition-all duration-200 ${
+                          className={`w-full px-2 sm:px-3 py-1.5 sm:py-2 border rounded-lg transition-all duration-200 text-xs sm:text-sm ${
                             editingMode === element._id
                               ? "border-indigo-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                               : "border-transparent bg-gray-50"
@@ -292,9 +293,9 @@ const MyJobs = () => {
 
                     {/* Status */}
                     <div className="flex items-start">
-                      <FaClock className="text-indigo-500 mt-1 mr-3 flex-shrink-0" />
+                      <FaClock className="text-indigo-500 mt-0.5 sm:mt-1 mr-2 sm:mr-3 flex-shrink-0 text-sm sm:text-base" />
                       <div className="flex-1">
-                        <h4 className="text-sm font-semibold text-gray-500 mb-1">Status</h4>
+                        <h4 className="text-xs sm:text-sm font-semibold text-gray-500 mb-1">Status</h4>
                         <select
                           value={element.expired}
                           onChange={(e) =>
@@ -305,7 +306,7 @@ const MyJobs = () => {
                             )
                           }
                           disabled={editingMode !== element._id}
-                          className={`w-full px-3 py-2 border rounded-lg transition-all duration-200 ${
+                          className={`w-full px-2 sm:px-3 py-1.5 sm:py-2 border rounded-lg transition-all duration-200 text-xs sm:text-sm ${
                             editingMode === element._id
                               ? "border-indigo-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                               : "border-transparent bg-gray-50"
@@ -319,9 +320,9 @@ const MyJobs = () => {
 
                     {/* Description */}
                     <div>
-                      <h4 className="text-sm font-semibold text-gray-500 mb-1">Description</h4>
+                      <h4 className="text-xs sm:text-sm font-semibold text-gray-500 mb-1">Description</h4>
                       <textarea
-                        rows={3}
+                        rows={2}
                         value={element.description}
                         disabled={editingMode !== element._id}
                         onChange={(e) =>
@@ -331,7 +332,7 @@ const MyJobs = () => {
                             e.target.value
                           )
                         }
-                        className={`w-full px-3 py-2 border rounded-lg transition-all duration-200 ${
+                        className={`w-full px-2 sm:px-3 py-1.5 sm:py-2 border rounded-lg transition-all duration-200 text-xs sm:text-sm ${
                           editingMode === element._id
                             ? "border-indigo-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                             : "border-transparent bg-gray-50"
@@ -341,7 +342,7 @@ const MyJobs = () => {
 
                     {/* Location Details */}
                     <div>
-                      <h4 className="text-sm font-semibold text-gray-500 mb-1">Location Details</h4>
+                      <h4 className="text-xs sm:text-sm font-semibold text-gray-500 mb-1">Location Details</h4>
                       <textarea
                         rows={2}
                         value={element.location}
@@ -353,7 +354,7 @@ const MyJobs = () => {
                             e.target.value
                           )
                         }
-                        className={`w-full px-3 py-2 border rounded-lg transition-all duration-200 ${
+                        className={`w-full px-2 sm:px-3 py-1.5 sm:py-2 border rounded-lg transition-all duration-200 text-xs sm:text-sm ${
                           editingMode === element._id
                             ? "border-indigo-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                             : "border-transparent bg-gray-50"
@@ -363,42 +364,42 @@ const MyJobs = () => {
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="flex justify-between items-center mt-8 pt-6 border-t border-gray-200">
-                    <div className="flex space-x-2">
+                  <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-gray-200 space-y-3 sm:space-y-0">
+                    <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                       {editingMode === element._id ? (
                         <>
                           <button
                             onClick={() => handleUpdateJob(element._id)}
-                            className="flex items-center px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors duration-200 shadow-md hover:shadow-lg"
+                            className="flex items-center justify-center px-3 sm:px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors duration-200 shadow-md hover:shadow-lg text-xs sm:text-sm"
                             title="Save Changes"
                           >
-                            <FaCheck className="w-4 h-4 mr-2" />
+                            <FaCheck className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                             Save
                           </button>
                           <button
                             onClick={handleDisableEdit}
-                            className="flex items-center px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors duration-200 shadow-md hover:shadow-lg"
+                            className="flex items-center justify-center px-3 sm:px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors duration-200 shadow-md hover:shadow-lg text-xs sm:text-sm"
                             title="Cancel"
                           >
-                            <RxCross2 className="w-4 h-4 mr-2" />
+                            <RxCross2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                             Cancel
                           </button>
                         </>
                       ) : (
                         <button
                           onClick={() => handleEnableEdit(element._id)}
-                          className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200 shadow-md hover:shadow-lg"
+                          className="flex items-center justify-center px-3 sm:px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200 shadow-md hover:shadow-lg text-xs sm:text-sm"
                         >
-                          <FaEdit className="w-4 h-4 mr-2" />
+                          <FaEdit className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                           Edit Job
                         </button>
                       )}
                     </div>
                     <button
                       onClick={() => handleDeleteJob(element._id)}
-                      className="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 shadow-md hover:shadow-lg"
+                      className="flex items-center justify-center px-3 sm:px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 shadow-md hover:shadow-lg text-xs sm:text-sm"
                     >
-                      <FaTrash className="w-4 h-4 mr-2" />
+                      <FaTrash className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                       Delete
                     </button>
                   </div>
@@ -407,11 +408,11 @@ const MyJobs = () => {
             ))}
           </div>
         ) : (
-          <div className="text-center py-16">
-            <div className="bg-white rounded-2xl shadow-xl p-10 max-w-md mx-auto transform hover:scale-105 transition-transform duration-300">
-              <div className="w-20 h-20 bg-gradient-to-r from-indigo-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
+          <div className="text-center py-12 sm:py-16">
+            <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg sm:shadow-xl p-6 sm:p-8 md:p-10 max-w-md mx-auto transform hover:scale-105 transition-transform duration-300">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-r from-indigo-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
                 <svg
-                  className="w-10 h-10 text-indigo-500"
+                  className="w-8 h-8 sm:w-10 sm:h-10 text-indigo-500"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -425,15 +426,15 @@ const MyJobs = () => {
                   />
                 </svg>
               </div>
-              <h3 className="text-2xl font-bold text-gray-800 mb-3">
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2 sm:mb-3">
                 No Jobs Posted Yet
               </h3>
-              <p className="text-gray-600 mb-6">
+              <p className="text-gray-600 mb-4 sm:mb-6 text-sm sm:text-base">
                 You haven't posted any jobs yet. Get started by creating your first job listing and find the perfect candidate!
               </p>
               <button
                 onClick={() => navigateTo("/job/post")}
-                className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1"
+                className="px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 text-sm sm:text-base"
               >
                 Post Your First Job
               </button>
