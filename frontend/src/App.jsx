@@ -1,11 +1,10 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext } from "react";
 import "./App.css";
 import { Context } from "./main";
-import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate, useLocation } from "react-router-dom";
 import Login from "./components/Auth/Login";
 import Register from "./components/Auth/Register";
 import { Toaster } from "react-hot-toast";
-import axios from "axios";
 import Navbar from "./components/Layout/Navbar";
 import Footer from "./components/Layout/Footer";
 import Home from "./components/Home/Home";
@@ -16,77 +15,134 @@ import MyApplications from "./components/Application/MyApplications";
 import PostJob from "./components/Job/PostJob";
 import NotFound from "./components/NotFound/NotFound";
 import MyJobs from "./components/Job/MyJobs";
-import { URL } from "../constant/api";
 import ScrollToTop from "./components/Layout/ScrollToTop";
 
-const App = () => {
-  const { isAuthorized, setIsAuthorized, setUser } = useContext(Context);
-  const [initializing, setInitializing] = useState(true);
-
-  useEffect(() => {
-    const initializeAuth = async () => {
-      try {
-        // Quick synchronous check first
-        const hasToken = localStorage.getItem("careerflow-token") || 
-                         document.cookie.includes("token=");
-        
-        // If no token, skip API call and show login immediately
-        if (!hasToken) {
-          setIsAuthorized(false);
-          setUser(null);
-          setInitializing(false);
-          return;
-        }
-
-        // Only make API call if token exists
-        const response = await axios.get(`${URL}/v1/user/getuser`, {
-          withCredentials: true,
-          timeout: 5000, // 5 second timeout
-        });
-        
-        if (response.data?.user) {
-          setUser(response.data.user);
-          setIsAuthorized(true);
-        } else {
-          // Invalid response, clear auth
-          setIsAuthorized(false);
-          setUser(null);
-          localStorage.removeItem("careerflow-token");
-        }
-      } catch (error) {
-        console.error("Auth initialization error:", error);
-        
-        // On error, clear invalid tokens and show login
-        setIsAuthorized(false);
-        setUser(null);
-        localStorage.removeItem("careerflow-token");
-        
-        // Clear potentially invalid cookies
-        if (error.response?.status === 401 || error.response?.status === 403) {
-          document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-        }
-      } finally {
-        setInitializing(false);
-      }
-    };
-
-    initializeAuth();
-  }, [setIsAuthorized, setUser]);
-
-  // Show minimal loading only during the very brief initialization
-  if (initializing) {
+// Protected Route Component
+const ProtectedRoute = ({ children }) => {
+  const { isAuthorized, loading } = useContext(Context);
+  const location = useLocation();
+  
+  // Show loading during auth check
+  if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
         <div className="text-center">
           <img
             src="/JobZeelogo.png"
             alt="CareerFlow Logo"
-            className="mx-auto h-16 w-auto mb-4"
+            className="mx-auto h-16 w-auto mb-4 animate-pulse"
+          />
+          <div className="flex items-center justify-center space-x-2">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600"></div>
+            <span className="text-indigo-600 font-medium">Loading...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
+  if (!isAuthorized) {
+    // Store intended destination
+    localStorage.setItem('redirectAfterLogin', location.pathname + location.search);
+    return <Navigate to="/login" replace />;
+  }
+  
+  return children;
+};
+
+// Public Route Component
+const PublicRoute = ({ children }) => {
+  const { isAuthorized, loading } = useContext(Context);
+  
+  // Show loading during auth check
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <img
+            src="/JobZeelogo.png"
+            alt="CareerFlow Logo"
+            className="mx-auto h-16 w-auto mb-4 animate-pulse"
+          />
+          <div className="flex items-center justify-center space-x-2">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600"></div>
+            <span className="text-indigo-600 font-medium">Loading...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
+  if (isAuthorized) {
+    // Check for intended destination after login
+    const redirectPath = localStorage.getItem('redirectAfterLogin');
+    if (redirectPath && redirectPath !== '/login' && redirectPath !== '/register') {
+      localStorage.removeItem('redirectAfterLogin');
+      return <Navigate to={redirectPath} replace />;
+    }
+    return <Navigate to="/" replace />;
+  }
+  
+  return children;
+};
+
+// Role-based route protection
+const RoleBasedRoute = ({ children, allowedRoles = [] }) => {
+  const { user, isAuthorized, loading } = useContext(Context);
+  
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
+          <p className="text-indigo-600 mt-2">Checking permissions...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  if (!isAuthorized) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  if (allowedRoles.length > 0 && !allowedRoles.includes(user?.role)) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center">
+        <div className="text-center bg-white p-8 rounded-lg shadow-lg">
+          <h2 className="text-2xl font-bold text-red-600 mb-4">Access Denied</h2>
+          <p className="text-gray-600 mb-4">You don't have permission to access this page.</p>
+          <button 
+            onClick={() => window.history.back()} 
+            className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
+          >
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
+  
+  return children;
+};
+
+const App = () => {
+  const { loading } = useContext(Context);
+
+  // Global loading screen during initial auth check
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <img
+            src="/JobZeelogo.png"
+            alt="CareerFlow Logo"
+            className="mx-auto h-16 w-auto mb-4 animate-pulse"
           />
           <div className="flex items-center justify-center space-x-2">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600"></div>
             <span className="text-indigo-600 font-medium">Starting CareerFlow...</span>
           </div>
+          <p className="text-gray-500 text-sm mt-2">Checking authentication...</p>
         </div>
       </div>
     );
@@ -98,32 +154,86 @@ const App = () => {
       <Navbar />
       
       <Routes>
-        {!isAuthorized ? (
-          <>
-            {/* Default route when not logged in → redirect to login */}
-            <Route path="/" element={<Navigate to="/login" replace />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="*" element={<Navigate to="/login" replace />} />
-          </>
-        ) : (
-          <>
-            {/* Private Routes when logged in */}
-            <Route path="/" element={<Home />} />
-            <Route path="/job/getall" element={<Jobs />} />
-            <Route path="/job/:id" element={<JobDetails />} />
-            <Route path="/application/:id" element={<Application />} />
-            <Route path="/applications/me" element={<MyApplications />} />
-            <Route path="/job/post" element={<PostJob />} />
-            <Route path="/job/me" element={<MyJobs />} />
-            
-            {/* Redirect auth pages to dashboard if already logged in */}
-            <Route path="/login" element={<Navigate to="/" replace />} />
-            <Route path="/register" element={<Navigate to="/" replace />} />
-            
-            <Route path="*" element={<NotFound />} />
-          </>
-        )}
+        {/* Public Routes */}
+        <Route 
+          path="/login" 
+          element={
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
+          } 
+        />
+        <Route 
+          path="/register" 
+          element={
+            <PublicRoute>
+              <Register />
+            </PublicRoute>
+          } 
+        />
+
+        {/* Protected Routes */}
+        <Route 
+          path="/" 
+          element={
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/job/getall" 
+          element={
+            <ProtectedRoute>
+              <Jobs />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/job/:id" 
+          element={
+            <ProtectedRoute>
+              <JobDetails />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/application/:id" 
+          element={
+            <ProtectedRoute>
+              <Application />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/applications/me" 
+          element={
+            <ProtectedRoute>
+              <MyApplications />
+            </ProtectedRoute>
+          } 
+        />
+        
+        {/* Role-based protected routes */}
+        <Route 
+          path="/job/post" 
+          element={
+            <RoleBasedRoute allowedRoles={['Employer']}>
+              <PostJob />
+            </RoleBasedRoute>
+          } 
+        />
+        <Route 
+          path="/job/me" 
+          element={
+            <RoleBasedRoute allowedRoles={['Employer']}>
+              <MyJobs />
+            </RoleBasedRoute>
+          } 
+        />
+
+        {/* Catch all route */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
       
       <Footer />

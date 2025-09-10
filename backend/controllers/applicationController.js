@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { catchAsyncErrors } from "../middlewares/catchAsyncError.js";
 import ErrorHandler from "../middlewares/error.js";
 import { Application } from "../models/applicationSchema.js";
@@ -5,190 +6,283 @@ import { Job } from "../models/jobSchema.js";
 
 // -------------------- Apply for a Job --------------------
 export const applyJob = catchAsyncErrors(async (req, res, next) => {
-    const userId = req.id;
-    const jobId = req.params.id;
+  const jobId = req.params.id;
+  const userId = req.user._id;
+  const { name, email, phone, address, coverLetter } = req.body;
 
-    if (!jobId) {
-        return next(new ErrorHandler("Job id is required.", 400));
-    }
+  // Validate Job ID
+  if (!mongoose.Types.ObjectId.isValid(jobId)) {
+    return next(new ErrorHandler("Invalid Job ID", 400));
+  }
 
-    // Check if user already applied
-    const existingApplication = await Application.findOne({ job: jobId, applicant: userId });
-    if (existingApplication) {
-        return next(new ErrorHandler("You have already applied for this job.", 400));
-    }
+  // Find the job
+  const job = await Job.findById(jobId);
+  if (!job) return next(new ErrorHandler("Job not found", 404));
 
-    // Check if job exists
-    const job = await Job.findById(jobId);
-    if (!job) {
-        return next(new ErrorHandler("Job not found.", 404));
-    }
+  // Check if user already applied
+  const existingApp = await Application.findOne({ job: jobId, applicant: userId });
+  if (existingApp) return next(new ErrorHandler("You already applied for this job", 400));
 
-    // Create a new application
-    const newApplication = await Application.create({ job: jobId, applicant: userId });
+  // Handle resume upload (if you have file upload setup)
+  let resumeData = {};
+  if (req.files && req.files.resume) {
+    // Add your cloudinary or file upload logic here
+    // For now, we'll just store basic info
+    resumeData = {
+      public_id: "temp_id",
+      url: "temp_url" // Replace with actual upload logic
+    };
+  }
 
-    // Push application id to job model
-    job.applications.push(newApplication._id);
-    await job.save();
+  // Create new application with all the required fields
+  const application = await Application.create({
+    job: jobId,
+    applicant: userId,
+    name,
+    email,
+    phone,
+    address,
+    coverLetter: coverLetter || "No cover letter provided",
+    resume: resumeData,
+    status: "pending",
+  });
 
-    res.status(201).json({
-        success: true,
-        message: "Job applied successfully."
-    });
+  // Ensure job.applications is initialized
+  if (!Array.isArray(job.applications)) {
+    job.applications = [];
+  }
+
+  // Add application reference to job
+  job.applications.push(application._id);
+  await job.save();
+
+  res.status(201).json({
+    success: true,
+    message: "Applied successfully",
+    application,
+  });
 });
 
-// -------------------- Get all applied jobs for a user --------------------
+// -------------------- Get all applications for a user --------------------
 export const getAppliedJobs = catchAsyncErrors(async (req, res, next) => {
-    const userId = req.id;
-    const applications = await Application.find({ applicant: userId })
-        .sort({ createdAt: -1 })
-        .populate({
-            path: "job",
-            populate: { path: "company" },
-        });
+  const userId = req.user._id;
+  const applications = await Application.find({ applicant: userId })
+    .sort({ createdAt: -1 })
+    .populate({ path: "job", populate: { path: "company" } });
 
-    if (!applications || applications.length === 0) {
-        return next(new ErrorHandler("No applications found.", 404));
-    }
+  if (!applications.length) {
+    return next(new ErrorHandler("No applications found", 404));
+  }
 
-    res.status(200).json({
-        success: true,
-        applications,
-    });
+  res.status(200).json({ success: true, applications });
 });
 
-// -------------------- Get applicants for a job (Admin) --------------------
+// -------------------- Get applicants for a job --------------------
 export const getApplicants = catchAsyncErrors(async (req, res, next) => {
-    const jobId = req.params.id;
-    const job = await Job.findById(jobId).populate({
-        path: "applications",
-        populate: { path: "applicant" }
-    });
+  const jobId = req.params.id;
 
-    if (!job) {
-        return next(new ErrorHandler("Job not found.", 404));
-    }
+  if (!mongoose.Types.ObjectId.isValid(jobId)) {
+    return next(new ErrorHandler("Invalid Job ID", 400));
+  }
 
-    res.status(200).json({
-        success: true,
-        job,
-    });
+  const job = await Job.findById(jobId).populate({
+    path: "applications",
+    populate: { path: "applicant" },
+  });
+
+  if (!job) return next(new ErrorHandler("Job not found", 404));
+
+  res.status(200).json({ success: true, job });
 });
 
 // -------------------- Employer: Get all applications --------------------
 export const employerGetAllApplications = catchAsyncErrors(async (req, res, next) => {
+  try {
+    console.log("=== EMPLOYER GET ALL APPLICATIONS DEBUG ===");
+    
+    // Step 1: Try basic query without populate
+    console.log("Step 1: Basic query...");
+    const basicApps = await Application.find();
+    console.log("Basic applications count:", basicApps.length);
+    console.log("Sample application:", basicApps[0]);
+
+    // Step 2: Try with simple populate
+    console.log("Step 2: With job populate...");
+    const jobPopulated = await Application.find().populate('job');
+    console.log("Job populated count:", jobPopulated.length);
+
+    // Step 3: Try full populate
+    console.log("Step 3: Full populate...");
     const applications = await Application.find()
-        .populate({
-            path: "job",
-            populate: { path: "company" },
-        })
-        .populate("applicant")
-        .sort({ createdAt: -1 });
+      .populate('job')
+      .populate('applicant')
+      .sort({ createdAt: -1 });
 
-    if (!applications || applications.length === 0) {
-        return next(new ErrorHandler("No applications found.", 404));
-    }
+    console.log("Fully populated count:", applications.length);
 
-    res.status(200).json({
-        success: true,
-        applications,
+    res.status(200).json({ 
+      success: true, 
+      applications: applications || [],
+      count: applications.length
     });
+
+  } catch (error) {
+    console.error("EMPLOYER GET ALL ERROR:", error);
+    return next(new ErrorHandler(`Failed to fetch applications: ${error.message}`, 500));
+  }
 });
 
 // -------------------- Jobseeker: Get all applications --------------------
+// -------------------- Jobseeker: Get all applications --------------------
 export const jobseekerGetAllApplications = catchAsyncErrors(async (req, res, next) => {
-    const userId = req.id;
-    const applications = await Application.find({ applicant: userId })
-        .sort({ createdAt: -1 })
-        .populate({
-            path: "job",
-            populate: { path: "company" },
-        });
+  console.log("=== DEBUG: Starting jobseekerGetAllApplications ===");
+  console.log("User from req:", req.user);
+  
+  if (!req.user || !req.user._id) {
+    console.log("❌ No user found in request");
+    return next(new ErrorHandler("User not authenticated", 401));
+  }
 
-    if (!applications || applications.length === 0) {
-        return next(new ErrorHandler("No applications found for this user.", 404));
-    }
+  const userId = req.user._id;
+  console.log("✅ User ID:", userId);
 
-    res.status(200).json({
-        success: true,
-        applications,
+  try {
+    // Step 1: Try basic query
+    console.log("Step 1: Basic query...");
+    const applications = await Application.find({ applicant: userId });
+    console.log("✅ Found applications count:", applications.length);
+
+    // Step 2: Try with sort
+    console.log("Step 2: With sorting...");
+    const sortedApps = await Application.find({ applicant: userId }).sort({ createdAt: -1 });
+    console.log("✅ Sorted applications count:", sortedApps.length);
+
+    // Step 3: Try with populate
+    console.log("Step 3: With populate...");
+    const populatedApps = await Application.find({ applicant: userId })
+      .sort({ createdAt: -1 })
+      .populate('job');
+    console.log("✅ Populated applications count:", populatedApps.length);
+
+    res.status(200).json({ 
+      success: true, 
+      applications: populatedApps,
+      count: populatedApps.length
     });
-});
 
-// -------------------- Delete application (Jobseeker) --------------------
+  } catch (error) {
+    console.error("❌ ACTUAL ERROR:", error.message);
+    console.error("❌ FULL ERROR:", error);
+    return next(new ErrorHandler(`Database error: ${error.message}`, 500));
+  }
+});
+// -------------------- Delete application --------------------
 export const jobseekerDeleteApplication = catchAsyncErrors(async (req, res, next) => {
-    const applicationId = req.params.id;
-    const userId = req.id;
+  const applicationId = req.params.id;
+  const userId = req.user._id;
 
-    const application = await Application.findOne({ _id: applicationId, applicant: userId });
-    if (!application) {
-        return next(new ErrorHandler("Application not found or not authorized.", 404));
-    }
+  if (!mongoose.Types.ObjectId.isValid(applicationId)) {
+    return next(new ErrorHandler("Invalid Application ID", 400));
+  }
 
-    // Remove from job
-    const job = await Job.findById(application.job);
-    if (job) {
-        job.applications = job.applications.filter(appId => appId.toString() !== applicationId.toString());
-        await job.save();
-    }
+  // Just delete the application without job cleanup for now
+  const application = await Application.findOneAndDelete({ 
+    _id: applicationId, 
+    applicant: userId 
+  });
 
-    // Delete application
-    await Application.findByIdAndDelete(applicationId);
+  if (!application) {
+    return next(new ErrorHandler("Application not found or unauthorized", 404));
+  }
 
-    res.status(200).json({
-        success: true,
-        message: "Application deleted successfully."
-    });
-});
-
-// -------------------- Post application --------------------
-export const postApplication = catchAsyncErrors(async (req, res, next) => {
-    const { jobId } = req.body;
-    const userId = req.id;
-
-    if (!jobId) {
-        return next(new ErrorHandler("Job ID is required", 400));
-    }
-
-    const job = await Job.findById(jobId);
-    if (!job) {
-        return next(new ErrorHandler("Job not found", 404));
-    }
-
-    const existing = await Application.findOne({ job: jobId, applicant: userId });
-    if (existing) {
-        return next(new ErrorHandler("You have already applied for this job", 400));
-    }
-
-    const application = await Application.create({ job: jobId, applicant: userId });
-    job.applications.push(application._id);
-    await job.save();
-
-    res.status(201).json({
-        success: true,
-        message: "Application submitted successfully"
-    });
+  res.status(200).json({ success: true, message: "Application deleted successfully" });
 });
 
 // -------------------- Update application status --------------------
 export const updateStatus = catchAsyncErrors(async (req, res, next) => {
-    const { status } = req.body;
-    const applicationId = req.params.id;
+  const { status } = req.body;
+  const applicationId = req.params.id;
 
-    if (!status) {
-        return next(new ErrorHandler("Status is required", 400));
-    }
+  if (!mongoose.Types.ObjectId.isValid(applicationId)) {
+    return next(new ErrorHandler("Invalid Application ID", 400));
+  }
 
+  if (!status) return next(new ErrorHandler("Status is required", 400));
+
+  const application = await Application.findById(applicationId);
+  if (!application) return next(new ErrorHandler("Application not found", 404));
+
+  application.status = status.toLowerCase();
+  await application.save();
+
+  res.status(200).json({ success: true, message: "Status updated successfully" });
+});
+// -------------------- Employer: Delete application --------------------
+export const employerDeleteApplication = catchAsyncErrors(async (req, res, next) => {
+  const applicationId = req.params.id;
+  const employerId = req.user._id;
+
+  console.log("=== EMPLOYER DELETE DEBUG ===");
+  console.log("Application ID:", applicationId);
+  console.log("Employer ID:", employerId);
+
+  if (!mongoose.Types.ObjectId.isValid(applicationId)) {
+    return next(new ErrorHandler("Invalid Application ID", 400));
+  }
+
+  try {
     const application = await Application.findById(applicationId);
+    
     if (!application) {
-        return next(new ErrorHandler("Application not found.", 404));
+      return next(new ErrorHandler("Application not found", 404));
     }
 
-    application.status = status.toLowerCase();
-    await application.save();
+    console.log("Application found, job reference:", application.job);
 
-    res.status(200).json({
-        success: true,
-        message: "Status updated successfully."
+    // Check if job exists and belongs to employer
+    if (application.job && mongoose.Types.ObjectId.isValid(application.job)) {
+      const job = await Job.findById(application.job);
+      
+      if (job) {
+        console.log("Job found. Job owner:", job.postedBy);
+        console.log("Current employer:", employerId);
+        console.log("Ownership match:", job.postedBy.toString() === employerId.toString());
+        
+        // Check ownership
+        if (job.postedBy.toString() !== employerId.toString()) {
+          return next(new ErrorHandler("Unauthorized: You can only delete applications for your jobs", 403));
+        }
+
+        // Clean up job's applications array
+        if (job.applications && Array.isArray(job.applications)) {
+          job.applications = job.applications.filter(appId => 
+            appId && appId.toString() !== applicationId.toString()
+          );
+          await job.save();
+        }
+      } else {
+        console.log("Job not found, allowing delete of orphaned application");
+      }
+    } else {
+      console.log("Invalid job reference, allowing delete");
+    }
+
+    // Perform the delete
+    const deletedApp = await Application.findByIdAndDelete(applicationId);
+    
+    if (!deletedApp) {
+      return next(new ErrorHandler("Failed to delete application", 500));
+    }
+
+    console.log("Application successfully deleted");
+
+    return res.status(200).json({
+      success: true,
+      message: "Application deleted successfully"
     });
+
+  } catch (error) {
+    console.error("DELETE ERROR:", error);
+    return next(new ErrorHandler(`Delete failed: ${error.message}`, 500));
+  }
 });

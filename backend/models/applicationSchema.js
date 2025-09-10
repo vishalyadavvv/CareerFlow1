@@ -1,52 +1,49 @@
 import mongoose from "mongoose";
-import validator from "validator";
 
-const applicationSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: [true, "Please enter your Name!"],
-    minLength: [3, "Name must contain at least 3 Characters!"],
-    maxLength: [30, "Name cannot exceed 30 Characters!"],
+const applicationSchema = new mongoose.Schema(
+  {
+    job: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Job",
+      required: true,
+    },
+    applicant: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    // Add the missing fields that your frontend needs
+    name: {
+      type: String,
+      required: true,
+    },
+    email: {
+      type: String,
+      required: true,
+    },
+    phone: {
+      type: String,
+      required: true,
+    },
+    address: {
+      type: String,
+      required: true,
+    },
+    coverLetter: {
+      type: String,
+      required: true,
+    },
+    resume: {
+      public_id: String,
+      url: String,
+    },
+    status: {
+      type: String,
+      enum: ["pending", "accepted", "rejected"],
+      default: "pending",
+    },
   },
-  email: {
-    type: String,
-    required: [true, "Please enter your Email!"],
-    validate: [validator.isEmail, "Please provide a valid Email!"],
-  },
-  coverLetter: {
-    type: String,
-    required: [true, "Please provide a cover letter!"],
-  },
-  phone: {
-    type: Number,
-    required: [true, "Please enter your Phone Number!"],
-  },
-  address: {
-    type: String,
-    required: [true, "Please enter your Address!"],
-  },
-  resume: {
-    public_id: { type: String, },
-    url: { type: String, required: true },
-  },
-  applicantID: {
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    role: { type: String, enum: ["Job Seeker"], required: true },
-  },
-  employerID: {
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    role: { type: String, enum: ["Employer"], required: true },
-  },
-  job: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Job",
-    required: true,
-  },
-  status: {
-    type: String,
-    enum: ["pending", "accepted", "rejected"],
-    default: "pending",
-  },
-}, { timestamps: true });
+  { timestamps: true }
+);
 
 export const Application = mongoose.model("Application", applicationSchema);

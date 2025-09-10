@@ -1,4 +1,3 @@
-// main.jsx
 import React, { createContext, useContext, useState, useEffect } from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App.jsx";
@@ -7,6 +6,11 @@ import { URL } from "../constant/api";
 
 export const Context = createContext({
   isAuthorized: false,
+  setIsAuthorized: () => {},
+  user: null,
+  setUser: () => {},
+  loading: true,
+  checkAuth: () => {},
 });
 
 export const useAppContext = () => useContext(Context);
@@ -18,21 +22,55 @@ const AppWrapper = () => {
 
   const checkAuth = async () => {
     try {
-      const { data } = await axios.get(`${URL}/v1/user/profile`, {
+      setLoading(true);
+      
+      // Quick check for token existence first
+      const hasToken = localStorage.getItem("careerflow-token") || 
+                       document.cookie.includes("token=");
+      
+      if (!hasToken) {
+        setIsAuthorized(false);
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+
+      // Use the correct endpoint that matches your App.jsx
+      const { data } = await axios.get(`${URL}/v1/user/getuser`, {
         withCredentials: true,
+        timeout: 8000,
       });
-      setIsAuthorized(true);
-      setUser(data.user);
+      
+      if (data?.user) {
+        setIsAuthorized(true);
+        setUser(data.user);
+      } else {
+        setIsAuthorized(false);
+        setUser(null);
+        localStorage.removeItem("careerflow-token");
+      }
     } catch (error) {
+      console.error("Auth check error:", error);
       setIsAuthorized(false);
       setUser(null);
+      
+      // Clear invalid tokens
+      localStorage.removeItem("careerflow-token");
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      }
     } finally {
       setLoading(false);
     }
   };
 
+  // Manual refresh function for after login/logout
+  const refreshAuth = async () => {
+    await checkAuth();
+  };
+
   useEffect(() => {
-    checkAuth(); // Run in background
+    checkAuth();
   }, []);
 
   return (
@@ -42,8 +80,8 @@ const AppWrapper = () => {
         setIsAuthorized,
         user,
         setUser,
-        checkAuth,
-        loading, // pass loading state for protected routes
+        loading,
+        checkAuth: refreshAuth, // Provide refresh function
       }}
     >
       <App />

@@ -7,7 +7,8 @@ import {
   employerGetAllApplications,
   jobseekerDeleteApplication,
   jobseekerGetAllApplications,
-  postApplication,
+  employerDeleteApplication,
+  // postApplication,
   updateStatus,
 } from "../controllers/applicationController.js";
 import { isAuthenticated } from "../middlewares/auth.js";
@@ -46,9 +47,11 @@ router.get("/applicants/:jobId", isAuthenticated, getApplicants);
 // =========================
 
 // Post a new application (alternative route)
-router.post("/post", isAuthenticated, upload.single("resume"), postApplication);
+// router.post("/post", isAuthenticated, upload.single("resume"), postApplication);
 
 // Update application status (by employer)
 router.put("/status/:id", isAuthenticated, updateStatus);
 
+// Delete an application by employer (for their job postings)
+router.delete("/employer/delete/:id", isAuthenticated, employerDeleteApplication);
 export default router;

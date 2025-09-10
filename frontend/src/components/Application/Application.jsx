@@ -3,7 +3,7 @@ import React, { useContext, useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { useNavigate, useParams } from "react-router-dom";
 import { Context } from "../../main";
-import { URL as API_URL } from "../../../constant/api";
+import { URL } from "../../../constant/api";
 
 const Application = () => {
   const [name, setName] = useState("");
@@ -68,11 +68,11 @@ const Application = () => {
 
     try {
       setIsSubmitting(true);
-      const res = await axios.post(`${URL}/v1/application/post`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-        withCredentials: true,
-        timeout: 30000, // 30 second timeout
-      });
+     const res = await axios.post(`${URL}/v1/application/apply/${jobId}`, formData, {
+  headers: { "Content-Type": "multipart/form-data" },
+  withCredentials: true,
+  timeout: 3000,
+});
       
       toast.success("Application submitted successfully!");
       navigateTo("/job/getall");
