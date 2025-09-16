@@ -1,4 +1,3 @@
-// database/dbConnection.js
 import mongoose from "mongoose";
 
 export const dbConnection = async () => {
