@@ -35,7 +35,7 @@ const AppWrapper = () => {
         return;
       }
 
-      // Use the correct endpoint that matches your App.jsx
+      // Verify token with backend
       const { data } = await axios.get(`${URL}/v1/user/getuser`, {
         withCredentials: true,
         timeout: 8000,
@@ -70,6 +70,7 @@ const AppWrapper = () => {
   };
 
   useEffect(() => {
+    // Check auth on mount
     checkAuth();
   }, []);
 
@@ -81,7 +82,7 @@ const AppWrapper = () => {
         user,
         setUser,
         loading,
-        checkAuth: refreshAuth, // Provide refresh function
+        checkAuth: refreshAuth,
       }}
     >
       <App />

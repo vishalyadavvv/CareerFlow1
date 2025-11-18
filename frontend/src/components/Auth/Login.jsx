@@ -2,7 +2,7 @@
 import React, { useState, useContext, useEffect } from "react";
 import { MdOutlineMailOutline } from "react-icons/md";
 import { RiLock2Fill } from "react-icons/ri";
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate, useLocation } from "react-router-dom";
 import { FaRegUser, FaGlobe } from "react-icons/fa";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -155,13 +155,13 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState(() => {
-    // Load saved language preference on component initialization
     const savedLanguage = localStorage.getItem("careerflow-language");
     return savedLanguage && translations[savedLanguage] ? savedLanguage : "en";
   });
 
-  const { isAuthorized, setIsAuthorized, setUser, user } = useContext(Context);
+  const { isAuthorized, setIsAuthorized, setUser, user, loading } = useContext(Context);
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Get current translations
   const t = translations[currentLanguage];
@@ -178,7 +178,7 @@ const Login = () => {
   const changeLanguage = (languageCode) => {
     setCurrentLanguage(languageCode);
     localStorage.setItem("careerflow-language", languageCode);
-    setShowLanguageDropdown(false); // Close dropdown after selection
+    setShowLanguageDropdown(false);
   };
 
   // Close dropdown when clicking outside
@@ -194,8 +194,30 @@ const Login = () => {
     return () => document.removeEventListener('click', handleClickOutside);
   }, []);
 
+  // FIXED: Better redirect logic
+  useEffect(() => {
+    // Only redirect if auth check is complete and user is authenticated
+    if (!loading && isAuthorized && user) {
+      const redirectPath = user.role === "Employer" ? "/" : "/job/getall";
+      
+      // Small delay to ensure smooth transition
+      const redirectTimer = setTimeout(() => {
+        navigate(redirectPath, { replace: true });
+      }, 100);
+      
+      return () => clearTimeout(redirectTimer);
+    }
+  }, [isAuthorized, user, loading, navigate]);
+
   const handleLogin = async (e) => {
     e.preventDefault();
+    
+    // Basic validation
+    if (!email || !password || !role) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+    
     setIsLoading(true);
 
     try {
@@ -209,27 +231,38 @@ const Login = () => {
       );
 
       toast.success(data?.message || t.loginSuccess);
+
+      // Clear fields
       setEmail("");
       setPassword("");
       setRole("");
 
+      // Set auth & user
       setIsAuthorized(true);
-      setUser(data.user);
 
-      // Store token for faster future checks
+      // Ensure user object has all required fields
+      const userData = {
+        name: data.user?.name || "Unknown User",
+        email: data.user?.email || email,
+        phone: data.user?.phone || "N/A",
+        role: data.user?.role || role,
+        ...data.user // Spread any additional user data
+      };
+
+      setUser(userData);
+      localStorage.setItem("careerflow-user", JSON.stringify(userData));
+
+      // Store token
       if (data.token) {
         localStorage.setItem("careerflow-token", data.token);
       }
 
-      // Redirect after login
-      if (data.user.role === "Employer") {
-        navigate("/");
-      } else {
-        navigate("/job/getall");
-      }
+      // Redirect based on role
+      const redirectPath = userData.role === "Employer" ? "/" : "/job/getall";
+      navigate(redirectPath, { replace: true });
+
     } catch (error) {
-      const errorMessage =
-        error?.response?.data?.message || t.loginFailed;
+      const errorMessage = error?.response?.data?.message || t.loginFailed;
       toast.error(errorMessage);
       console.error("Login error:", error);
     } finally {
@@ -237,10 +270,42 @@ const Login = () => {
     }
   };
 
-  // If already authorized, redirect immediately
+  // FIXED: Show loading state during initial auth check
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <img
+            src="/JobZeelogo.png"
+            alt="CareerFlow Logo"
+            className="mx-auto h-16 w-auto mb-4 animate-pulse"
+          />
+          <div className="flex items-center justify-center space-x-2">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600"></div>
+            <span className="text-indigo-600 font-medium">Checking authentication...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // FIXED: Only redirect if definitely authenticated
   if (isAuthorized && user) {
-    const redirectPath = user.role === "Employer" ? "/" : "/job/getall";
-    return <Navigate to={redirectPath} replace />;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <img
+            src="/JobZeelogo.png"
+            alt="CareerFlow Logo"
+            className="mx-auto h-16 w-auto mb-4"
+          />
+          <div className="flex items-center justify-center space-x-2">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600"></div>
+            <span className="text-indigo-600 font-medium">Redirecting...</span>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (

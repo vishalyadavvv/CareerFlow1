@@ -32,9 +32,9 @@ const Footer = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Optimized animations - only run once when authorized
+  // Optimized animations - run for all users
   useEffect(() => {
-    if (isAuthorized && footerRef.current && !animationsLoaded) {
+    if (footerRef.current && !animationsLoaded) {
       // Single timeline for better performance
       const tl = gsap.timeline({
         scrollTrigger: {
@@ -60,7 +60,7 @@ const Footer = () => {
 
       setAnimationsLoaded(true);
     }
-  }, [isAuthorized, animationsLoaded]);
+  }, [animationsLoaded]);
 
   const socialLinks = [
     {
@@ -117,7 +117,7 @@ const Footer = () => {
     { name: "Cookie Policy", path: "/cookies" }
   ];
 
-  if (!isAuthorized) return null;
+  // REMOVED: if (!isAuthorized) return null;
 
   return (
     <footer
@@ -136,7 +136,7 @@ const Footer = () => {
                 className="h-8 sm:h-10 mr-2"
                 loading="lazy"
               />
-              CareerFlow
+              JobZee
             </h3>
             <p className="text-gray-300 mb-4 sm:mb-6 text-sm sm:text-base leading-relaxed">
               Connecting talent with opportunity. Find your dream job or the perfect candidate with our advanced platform.
@@ -213,7 +213,7 @@ const Footer = () => {
         {/* Copyright */}
         <div className="footer-section border-t border-gray-700 pt-6 sm:pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-gray-400 text-sm sm:text-base text-center sm:text-left">
-            &copy; {new Date().getFullYear()} CareerFlow. All Rights Reserved by Vishal.
+            &copy; {new Date().getFullYear()} JobZee. All Rights Reserved by Vishal.
           </p>
           
           <div className="flex flex-wrap justify-center sm:justify-end space-x-4 sm:space-x-6 text-xs sm:text-sm text-gray-400">
