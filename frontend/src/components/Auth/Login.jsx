@@ -221,15 +221,26 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const { data } = await axios.post(
-        `${URL}/v1/user/login`,
-        { email, password, role },
-        {
-          headers: { "Content-Type": "application/json" },
-          withCredentials: true,
-        }
-      );
+     const loginUser = async ({ email, password, role }) => {
+  try {
+    const { data } = await axios.post(
+      `${URL}/v1/user/login`,  // Correct endpoint
+      { email, password, role }, // Payload
+      {
+        headers: {
+          "Content-Type": "application/json", // Tell server JSON is sent
+        },
+        withCredentials: true, // Include cookies if backend uses HTTP-only cookies
+      }
+    );
 
+    console.log("Login success:", data);
+    return data; // Return the server response
+  } catch (error) {
+    console.error("Login failed:", error.response?.data || error.message);
+    throw error; // Let caller handle error
+  }
+};
       toast.success(data?.message || t.loginSuccess);
 
       // Clear fields
