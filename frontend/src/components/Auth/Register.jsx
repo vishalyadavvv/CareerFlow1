@@ -245,26 +245,17 @@ const Register = () => {
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
-     const registerUser = async ({ name, phone, email, role, password }) => {
-  try {
-    const { data } = await axios.post(
-      `${URL}/v1/user/register`, // Correct endpoint
-      { name, phone, email, role, password }, // Payload
-      {
-        headers: {
-          "Content-Type": "application/json", // JSON payload
-        },
-        withCredentials: true, // Include cookies if backend sets them
-      }
-    );
+      const { data } = await axios.post(
+        `${URL}v1/user/register`,
+        { name, phone, email, role, password },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
+        }
+      );
 
-    console.log("Register success:", data);
-    return data; // Return the response
-  } catch (error) {
-    console.error("Register failed:", error.response?.data || error.message);
-    throw error; // Let the caller handle the error
-  }
-};
       toast.success(data?.message || t.registrationSuccess);
 
       // Clear fields
