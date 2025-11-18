@@ -222,7 +222,7 @@ const Login = () => {
 
     try {
       const { data } = await axios.post(
-        `${URL}v1/user/login`,
+        `${URL}/v1/user/login`,
         { email, password, role },
         {
           headers: { "Content-Type": "application/json" },

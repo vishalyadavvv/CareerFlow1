@@ -246,7 +246,7 @@ const Register = () => {
     e.preventDefault();
     try {
       const { data } = await axios.post(
-        `${URL}v1/user/register`,
+        `${URL}/v1/user/register`,
         { name, phone, email, role, password },
         {
           headers: {
